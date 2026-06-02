@@ -14,10 +14,16 @@ docker run --rm -i -v "$PWD:/w" -w /w "$base" sh -s -- "$img" <<'IN'
 set -eu
 img="$1"
 apk add -U squashfs-tools >/dev/null
+root="$(mktemp -d)"
+unsquashfs -q -d "$root/x" "$img" >/dev/null
 for b in emacs nano ncdu htop; do
-  unsquashfs -l "$img" | grep -q "usr/bin/$b$" || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
+  f="$root/x/usr/bin/$b"
+  [ -e "$f" ] || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
+  # must be a flatwrap wrapper, not a link to the raw musl binary
+  head -c2 "$(readlink -f "$f")" 2>/dev/null | grep -q '#!' \
+    || { echo "/usr/bin/$b is not a flatwrap wrapper" >&2 ; exit 1 ; }
 done
-unsquashfs -l "$img" | grep -q "extension-release.tools$" \
+[ -e "$root/x/usr/lib/extension-release.d/extension-release.tools" ] \
   || { echo "missing extension-release.tools" >&2 ; exit 1 ; }
 echo "smoke ok: $img"
 IN
