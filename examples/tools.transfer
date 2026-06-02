@@ -1,5 +1,5 @@
 # systemd-sysupdate transfer for the tools sysext.
-# Install on the host as /etc/sysupdate.tools.d/tools.conf and update with
+# Install on the host as /etc/sysupdate.tools.d/tools.transfer and update with
 # `systemd-sysupdate -C tools update`.
 [Transfer]
 Verify=false
@@ -13,4 +13,5 @@ MatchPattern=tools-@v-%a.raw
 InstancesMax=3
 Type=regular-file
 Path=/opt/extensions/tools
+MatchPattern=tools-@v-%a.raw
 CurrentSymlink=/etc/extensions/tools.raw

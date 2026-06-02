@@ -9,8 +9,8 @@ on:
     paths:
       - extensions/**
       - build/**
-      - examples/tools.conf
-      - examples/noop.conf
+      - examples/tools.transfer
+      - examples/noop.transfer
       - .github/workflows/release.yaml
   schedule:
     - cron: '0 5 * * 5' # Fridays 05:00 UTC
@@ -68,11 +68,11 @@ jobs:
             exit 0
           fi
 
-          cp examples/tools.conf examples/noop.conf .
+          cp examples/tools.transfer examples/noop.transfer .
           # Unversioned copies give Ignition a download URL that never rotates.
           for a in x86-64 arm64; do cp "tools-${VERSION}-${a}.raw" "tools-${a}.raw"; done
           gh release delete tools --cleanup-tag --yes 2>/dev/null || true
           gh release create tools \
             --title "tools (rolling)" \
             --notes "Rolling tools sysext. Latest build: ${VERSION}." \
-            tools-*.raw SHA256SUMS tools.conf noop.conf MANIFEST-*
+            tools-*.raw SHA256SUMS tools.transfer noop.transfer MANIFEST-*

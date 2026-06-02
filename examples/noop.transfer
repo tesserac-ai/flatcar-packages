@@ -1,6 +1,6 @@
 # Placeholder transfer so the default (componentless) systemd-sysupdate run is
 # a no-op. Real updates run per-component via `systemd-sysupdate -C tools`.
-# Install on the host as /etc/sysupdate.d/noop.conf.
+# Install on the host as /etc/sysupdate.d/noop.transfer.
 [Source]
 Type=regular-file
 Path=/usr/share/flatcar/
