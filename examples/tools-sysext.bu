@@ -7,12 +7,12 @@ version: 1.1.0
 
 storage:
   files:
-    # Initial tools image. Pin the current release; sysupdate takes over after
-    # first boot. Replace the version with the latest from the `tools` release.
-    - path: /opt/extensions/tools/tools-2026.06.02.1-x86-64.raw
+    # Initial tools image. The unversioned asset always resolves to the latest
+    # release; sysupdate takes over the versioned images after first boot.
+    - path: /opt/extensions/tools/tools-x86-64.raw
       mode: 0644
       contents:
-        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools-2026.06.02.1-x86-64.raw
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools-x86-64.raw
 
     - path: /etc/sysupdate.tools.d/tools.conf
       contents:
@@ -25,7 +25,7 @@ storage:
 
   links:
     - path: /etc/extensions/tools.raw
-      target: /opt/extensions/tools/tools-2026.06.02.1-x86-64.raw
+      target: /opt/extensions/tools/tools-x86-64.raw
       hard: false
 
 systemd:
