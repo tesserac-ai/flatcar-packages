@@ -1,0 +1,35 @@
+### Project ###
+CLAUDE.local.md
+.claude/settings.local.json
+megalinter-reports/
+
+### Build artifacts ###
+*.raw
+SHA256SUMS
+MANIFEST-*
+
+### Emacs ###
+*~
+\#*\#
+*.elc
+.\#*
+
+### Linux ###
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+### macOS ###
+.DS_Store
+._*
+
+### Vim ###
+[._]*.s[a-v][a-z]
+[._]sw[a-p]
+Session.vim
+.netrwhist
+
+### VisualStudioCode ###
+.vscode/
+*.vsix
