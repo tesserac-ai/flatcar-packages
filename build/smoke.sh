@@ -14,7 +14,7 @@ docker run --rm -i -v "$PWD:/w" -w /w "$base" sh -s -- "$img" <<'IN'
 set -eu
 img="$1"
 apk add -U squashfs-tools >/dev/null
-for b in emacs ncdu htop; do
+for b in emacs nano ncdu htop; do
   unsquashfs -l "$img" | grep -q "usr/bin/$b$" || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
 done
 unsquashfs -l "$img" | grep -q "extension-release.tools$" \

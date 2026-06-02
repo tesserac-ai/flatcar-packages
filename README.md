@@ -8,6 +8,7 @@ installed packages.
 ## What's in the `tools` sysext
 
 - `emacs-nox`: text editor
+- `nano`: small editor
 - `ncdu`: disk usage browser
 - `htop`: process viewer
 
