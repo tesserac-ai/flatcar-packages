@@ -23,6 +23,11 @@ storage:
       contents:
         source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.transfer
 
+  directories:
+    # Debian's emacs reads this at launch; the sysext also creates it via
+    # tmpfiles, but Ignition makes it deterministic at first boot.
+    - path: /etc/emacs/site-start.d
+
   links:
     - path: /etc/extensions/tools.raw
       target: /opt/extensions/tools/tools-x86-64.raw

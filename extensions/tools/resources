@@ -1,0 +1,6 @@
+# Non-binary paths the tools need at runtime (data, lisp, dumps), one per line.
+# Copied verbatim into the sysext; flix does not resolve their libraries.
+/usr/share/emacs
+/usr/lib/emacs
+/usr/libexec/emacs
+/usr/share/nano

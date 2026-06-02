@@ -3,6 +3,6 @@ Copyright 2026 Tesserac
 
 This product includes software developed by the Flatcar Maintainers:
 
-  build/flatwrap.sh
+  build/flix.sh
   Vendored from https://github.com/flatcar/sysext-bakery
   Copyright the Flatcar Maintainers, licensed under the Apache License 2.0.
