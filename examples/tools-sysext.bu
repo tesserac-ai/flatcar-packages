@@ -1,0 +1,46 @@
+variant: flatcar
+version: 1.1.0
+
+# Provision the tools sysext and keep it current with systemd-sysupdate.
+# Transpile with butane and feed the result to Ignition:
+#   butane --strict tools-sysext.bu > tools-sysext.ign
+
+storage:
+  files:
+    # Initial tools image. Pin the current release; sysupdate takes over after
+    # first boot. Replace the version with the latest from the `tools` release.
+    - path: /opt/extensions/tools/tools-2026.06.06.1-x86-64.raw
+      mode: 0644
+      contents:
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools-2026.06.06.1-x86-64.raw
+
+    - path: /etc/sysupdate.tools.d/tools.conf
+      contents:
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools.conf
+
+    # Make the default (componentless) sysupdate run a no-op.
+    - path: /etc/sysupdate.d/noop.conf
+      contents:
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.conf
+
+  links:
+    - path: /etc/extensions/tools.raw
+      target: /opt/extensions/tools/tools-2026.06.06.1-x86-64.raw
+      hard: false
+
+systemd:
+  units:
+    - name: systemd-sysupdate.timer
+      enabled: true
+
+    # Update the tools component on each sysupdate run, and flag a reboot when
+    # the active image changed so the new version is merged on next boot.
+    - name: systemd-sysupdate.service
+      dropins:
+        - name: tools.conf
+          contents: |
+            [Service]
+            ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/tools.raw > /tmp/tools"
+            ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C tools update
+            ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/tools.raw > /tmp/tools-new"
+            ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/tools /tmp/tools-new; then touch /run/reboot-required; fi"
