@@ -52,16 +52,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Skip the release when the resolved package set is unchanged.
+          # The weekly build only publishes when the package set changed; a
+          # push or manual dispatch changes build inputs, so always publishes.
           changed=true
-          mkdir -p prev
-          if gh release download tools -D prev -p 'MANIFEST-*' 2>/dev/null; then
-            if diff -q <(sort MANIFEST-x86-64) <(sort prev/MANIFEST-x86-64) >/dev/null \
-              && diff -q <(sort MANIFEST-arm64) <(sort prev/MANIFEST-arm64) >/dev/null; then
-              changed=false
+          if [ "${GITHUB_EVENT_NAME}" = schedule ]; then
+            mkdir -p prev
+            if gh release download tools -D prev -p 'MANIFEST-*' 2>/dev/null; then
+              if diff -q <(sort MANIFEST-x86-64) <(sort prev/MANIFEST-x86-64) >/dev/null \
+                && diff -q <(sort MANIFEST-arm64) <(sort prev/MANIFEST-arm64) >/dev/null; then
+                changed=false
+              fi
             fi
+            rm -rf prev
           fi
-          rm -rf prev
 
           if [ "${changed}" = false ]; then
             echo "no package changes since last release; nothing to publish"
