@@ -1,0 +1,76 @@
+---
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - extensions/**
+      - build/**
+      - examples/tools.conf
+      - examples/noop.conf
+      - .github/workflows/release.yaml
+  schedule:
+    - cron: '0 5 * * 5' # Fridays 05:00 UTC
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: build and publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up qemu for arm64 emulation
+        uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
+        with:
+          platforms: arm64
+
+      - name: Build both architectures
+        run: |
+          version="$(date +%Y.%m.%d).${GITHUB_RUN_NUMBER}"
+          echo "VERSION=${version}" >> "${GITHUB_ENV}"
+          build/build.sh x86-64 "${version}"
+          build/build.sh arm64 "${version}"
+          sha256sum tools-*.raw > SHA256SUMS
+
+      - name: Publish rolling release if packages changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Skip the release when the resolved package set is unchanged.
+          changed=true
+          mkdir -p prev
+          if gh release download tools -D prev -p 'MANIFEST-*' 2>/dev/null; then
+            if diff -q <(sort MANIFEST-x86-64) <(sort prev/MANIFEST-x86-64) >/dev/null \
+              && diff -q <(sort MANIFEST-arm64) <(sort prev/MANIFEST-arm64) >/dev/null; then
+              changed=false
+            fi
+          fi
+          rm -rf prev
+
+          if [ "${changed}" = false ]; then
+            echo "no package changes since last release; nothing to publish"
+            exit 0
+          fi
+
+          cp examples/tools.conf examples/noop.conf .
+          gh release delete tools --cleanup-tag --yes 2>/dev/null || true
+          gh release create tools \
+            --title "tools (rolling)" \
+            --notes "Rolling tools sysext. Latest build: ${VERSION}." \
+            tools-*.raw SHA256SUMS tools.conf noop.conf MANIFEST-*
