@@ -7,8 +7,9 @@ example is in [../examples/tools-sysext.bu](../examples/tools-sysext.bu).
 
 At first boot, Ignition places three things:
 
-- the initial image at `/opt/extensions/tools/tools-<version>-<arch>.raw`, with
-  `/etc/extensions/tools.raw` symlinked to it so systemd-sysext merges it;
+- the initial image at `/opt/extensions/tools/tools-<arch>.raw` (the stable
+  asset that tracks the latest release), with `/etc/extensions/tools.raw`
+  symlinked to it so systemd-sysext merges it;
 - the sysupdate transfer config at `/etc/sysupdate.tools.d/tools.conf`;
 - a no-op transfer at `/etc/sysupdate.d/noop.conf`.
 
