@@ -1,0 +1,4 @@
+# Alpine packages baked into the `tools` sysext, one per line.
+emacs-nox
+ncdu
+htop

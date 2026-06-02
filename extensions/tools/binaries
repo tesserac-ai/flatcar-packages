@@ -1,0 +1,5 @@
+# Binaries exposed from the sysext as flatwrap entry points, one per line.
+# Absolute paths inside the Alpine root.
+/usr/bin/emacs
+/usr/bin/ncdu
+/usr/bin/htop
