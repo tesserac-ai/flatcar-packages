@@ -55,8 +55,27 @@ name="$1" ; arch="$2" ; packages="$3" ; binaries="$4"
 apk add -U $packages bash coreutils grep >/dev/null
 apk info -v | sort > "/out/MANIFEST-$arch"
 cd /out/root
+
+# flatwrap won't wrap a symlinked entry point; wrap the real target and
+# relink the friendly name to it.
+wrap="" ; links=""
+for b in $binaries; do
+  if [ -L "$b" ]; then
+    real="$(realpath "$b")"
+    wrap="$wrap $real"
+    links="$links ${b##*/}:${real##*/}"
+  else
+    wrap="$wrap $b"
+  fi
+done
+
 # Alpine keeps terminfo under /etc, so keep the chroot's /etc (ETCMAP=chroot).
-ETCMAP=chroot /flatwrap.sh / "$name" $binaries
+ETCMAP=chroot /flatwrap.sh / "$name" $wrap
+
+for l in $links; do
+  ln -sf "${l##*:}" "$name/usr/bin/${l%%:*}"
+done
+
 chown -R "$(stat -c '%u:%g' /out)" /out
 IN
 
