@@ -1,0 +1,32 @@
+---
+DISABLE_LINTERS:
+  - SPELL_CSPELL
+  # No IaC, k8s manifests, or dependency lockfiles here. The only Dockerfile is
+  # a never-built version anchor for Dependabot; hadolint covers its style.
+  - REPOSITORY_CHECKOV
+  - REPOSITORY_TRIVY
+  - REPOSITORY_OSV_SCANNER
+
+YAML_YAMLLINT_CONFIG_FILE: .yamllint
+
+# flatwrap.sh is vendored from sysext-bakery; LICENSE is the verbatim Apache text.
+FILTER_REGEX_EXCLUDE: (build/flatwrap\.sh|LICENSE)
+
+ADDITIONAL_EXCLUDED_DIRECTORIES:
+  - megalinter-reports
+
+SHOW_ELAPSED_TIME: true
+SHOW_SKIPPED_LINTERS: false
+PRINT_ALPACA: false
+VALIDATE_ALL_CODEBASE: false
+PARALLEL: true
+CLEAR_REPORT_FOLDER: true
+FAIL_IF_UPDATED_SOURCES: true
+IGNORE_GENERATED_FILES: true
+GITHUB_COMMENT_REPORTER: false
+FLAVOR_SUGGESTIONS: false
+
+ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
+  - GITHUB_TOKEN
+
+REPOSITORY_KICS_ARGUMENTS: "--fail-on high,critical"
