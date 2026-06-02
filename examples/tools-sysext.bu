@@ -14,14 +14,14 @@ storage:
       contents:
         source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools-x86-64.raw
 
-    - path: /etc/sysupdate.tools.d/tools.conf
+    - path: /etc/sysupdate.tools.d/tools.transfer
       contents:
-        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools.conf
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools.transfer
 
     # Make the default (componentless) sysupdate run a no-op.
-    - path: /etc/sysupdate.d/noop.conf
+    - path: /etc/sysupdate.d/noop.transfer
       contents:
-        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.conf
+        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.transfer
 
   links:
     - path: /etc/extensions/tools.raw

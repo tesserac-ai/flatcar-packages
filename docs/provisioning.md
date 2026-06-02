@@ -10,8 +10,8 @@ At first boot, Ignition places three things:
 - the initial image at `/opt/extensions/tools/tools-<arch>.raw` (the stable
   asset that tracks the latest release), with `/etc/extensions/tools.raw`
   symlinked to it so systemd-sysext merges it;
-- the sysupdate transfer config at `/etc/sysupdate.tools.d/tools.conf`;
-- a no-op transfer at `/etc/sysupdate.d/noop.conf`.
+- the sysupdate transfer config at `/etc/sysupdate.tools.d/tools.transfer`;
+- a no-op transfer at `/etc/sysupdate.d/noop.transfer`.
 
 After that, `systemd-sysext` merges the image into `/usr` on every boot and the
 binaries (`emacs`, `nano`, `ncdu`, `htop`) are on `PATH`.
@@ -20,7 +20,7 @@ binaries (`emacs`, `nano`, `ncdu`, `htop`) are on `PATH`.
 
 `systemd-sysupdate.timer` runs periodically. The drop-in on
 `systemd-sysupdate.service` runs `systemd-sysupdate -C tools update`, which
-reads `/etc/sysupdate.tools.d/tools.conf`, fetches the `SHA256SUMS` index from
+reads `/etc/sysupdate.tools.d/tools.transfer`, fetches the `SHA256SUMS` index from
 the rolling `tools` release, and downloads a newer image if one exists.
 
 A downloaded image becomes active on the next boot. The drop-in touches
@@ -32,7 +32,7 @@ systemd-sysupdate -C tools update
 systemd-sysext refresh
 ```
 
-The `noop.conf` exists because the default, componentless
+The `noop.transfer` exists because the default, componentless
 `systemd-sysupdate.service` invocation still runs; it gives that invocation a
 transfer that matches nothing instead of erroring.
 
