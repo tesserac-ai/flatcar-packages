@@ -9,8 +9,8 @@ DISABLE_LINTERS:
 
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
 
-# flatwrap.sh is vendored from sysext-bakery; LICENSE is the verbatim Apache text.
-FILTER_REGEX_EXCLUDE: (build/flatwrap\.sh|LICENSE)
+# flix.sh is vendored from sysext-bakery; LICENSE is the verbatim Apache text.
+FILTER_REGEX_EXCLUDE: (build/flix\.sh|LICENSE)
 
 ADDITIONAL_EXCLUDED_DIRECTORIES:
   - megalinter-reports

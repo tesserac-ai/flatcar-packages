@@ -30,7 +30,12 @@ can pick it up. To merge immediately without a reboot:
 ```sh
 systemd-sysupdate -C tools update
 systemd-sysext refresh
+systemd-tmpfiles --create # emacs needs /etc/emacs/site-start.d
 ```
+
+The `systemd-tmpfiles` step is only needed for an in-place merge; on a normal
+boot it runs on its own. emacs ships a `tmpfiles.d` drop-in that creates the
+directory Debian's emacs reads at startup.
 
 The `noop.transfer` exists because the default, componentless
 `systemd-sysupdate.service` invocation still runs; it gives that invocation a

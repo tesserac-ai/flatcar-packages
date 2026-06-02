@@ -1,6 +1,7 @@
-# Binaries exposed from the sysext as flatwrap entry points, one per line.
-# Absolute paths inside the Alpine root.
-/usr/bin/emacs
+# Entry-point binaries exposed on PATH, one per line. Absolute paths inside the
+# Debian root. Use `path=name` when the desired command name differs from the
+# binary (Debian ships /usr/bin/emacs as an alternatives symlink).
+/usr/bin/emacs-nox=emacs
 /usr/bin/nano
-/usr/bin/ncdu
 /usr/bin/htop
+/usr/bin/ncdu
