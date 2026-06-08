@@ -1,5 +1,7 @@
 export default {
   extends: ['@commitlint/config-conventional'],
+  // dependabot bodies carry long changelog URLs we don't control
+  ignores: [(msg) => /Signed-off-by: dependabot\[bot\]/.test(msg)],
   rules: {
     'type-enum': [2, 'always', [
       'feat', 'fix', 'docs', 'style', 'refactor',
