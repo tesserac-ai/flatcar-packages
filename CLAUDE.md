@@ -1,9 +1,9 @@
 # flatcar-packages
 
 Builds systemd-sysext images of extra CLI tools for Flatcar Container Linux.
-The `tools` sysext (emacs-nox, ncdu, htop) is built from Alpine packages,
-wrapped with flatwrap, packed as squashfs, and shipped via a rolling GitHub
-release that hosts pull with systemd-sysupdate.
+The `tools` sysext (see `extensions/tools/packages`) is built from Debian
+packages, wrapped with flatwrap, packed as squashfs, and shipped via a rolling
+GitHub release that hosts pull with systemd-sysupdate.
 
 ## Layout
 
