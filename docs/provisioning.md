@@ -14,7 +14,7 @@ At first boot, Ignition places three things:
 - a no-op transfer at `/etc/sysupdate.d/noop.transfer`.
 
 After that, `systemd-sysext` merges the image into `/usr` on every boot and the
-binaries (`emacs`, `nano`, `ncdu`, `htop`) are on `PATH`.
+binaries (`emacs`, `nano`, `ncdu`, `htop`, `rsync`) are on `PATH`.
 
 ## Updates
 

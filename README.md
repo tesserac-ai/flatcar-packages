@@ -11,6 +11,7 @@ installed packages.
 - `nano`: small editor
 - `ncdu`: disk usage browser
 - `htop`: process viewer
+- `rsync`: file transfer, also what Ansible's synchronize needs on the host
 
 ## How hosts consume it
 
