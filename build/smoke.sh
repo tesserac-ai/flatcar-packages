@@ -10,7 +10,9 @@ img="${1:?usage: smoke.sh <image.raw>}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 base="$(awk '/^FROM/ {print $2; exit}' "$here/Dockerfile")"
 
-docker run --rm -i --privileged -v "$PWD:/w" -w /w "$base" sh -s -- "$img" <<'IN'
+# --pull always: after an arm64 build the local tag points at arm64, and bwrap
+# cannot create namespaces under qemu-user.
+docker run --rm -i --privileged --pull always -v "$PWD:/w" -w /w "$base" sh -s -- "$img" <<'IN'
 set -eu
 img="$1"
 export DEBIAN_FRONTEND=noninteractive
