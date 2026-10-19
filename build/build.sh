@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+here="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 repo="$(dirname "$here")"
 name=tools
 

@@ -7,7 +7,7 @@
 set -euo pipefail
 
 img="${1:?usage: smoke.sh <image.raw>}"
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+here="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 base="$(awk '/^FROM/ {print $2; exit}' "$here/Dockerfile")"
 
 # --pull always: after an arm64 build the local tag points at arm64, and bwrap
