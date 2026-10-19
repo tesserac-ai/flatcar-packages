@@ -33,17 +33,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up qemu for arm64 emulation
-        uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
-        with:
-          platforms: arm64
-
-      - name: Build both architectures
+      - name: Build
         run: |
           version="$(date +%Y.%m.%d).${GITHUB_RUN_NUMBER}"
           echo "VERSION=${version}" >> "${GITHUB_ENV}"
           build/build.sh x86-64 "${version}"
-          build/build.sh arm64 "${version}"
           sha256sum tools-*.raw > SHA256SUMS
 
       - name: Smoke test
@@ -80,7 +74,7 @@ jobs:
           fi
 
           # Unversioned copies give Ignition a download URL that never rotates.
-          for a in x86-64 arm64; do cp "tools-${VERSION}-${a}.raw" "tools-${a}.raw"; done
+          cp "tools-${VERSION}-x86-64.raw" tools-x86-64.raw
           gh release delete tools --cleanup-tag --yes 2>/dev/null || true
           gh release create tools \
             --title "tools (rolling)" \
