@@ -39,6 +39,10 @@ for b in emacs nano htop ncdu; do
   [ -e "$root/x/usr/bin/$b" ] || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
 done
 
+for f in doc/flatcar-tools/NOTICE doc/emacs-nox/copyright common-licenses/GPL-3; do
+  [ -e "$root/x/usr/share/$f" ] || { echo "missing /usr/share/$f" >&2 ; exit 1 ; }
+done
+
 # Piping into head would drop the exit status of a tool that fails.
 ver() {
   run "$@" >"$root/ver"

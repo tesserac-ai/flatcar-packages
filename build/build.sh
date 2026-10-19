@@ -4,11 +4,12 @@
 #
 # Usage: build/build.sh <arch> <version>
 #   <arch>     x86-64 | arm64
-#   <version>  image version string, e.g. 2026.06.02
+#   <version>  image version string; the release uses <date>.<run>, e.g. 2026.10.19.33
 #
 # Output, in the current directory:
 #   tools-<version>-<arch>.raw   squashfs sysext image
 #   MANIFEST-<arch>              package versions the image was built from
+#   SOURCES-<arch>               source packages of the bundled files
 #
 # Debian's glibc binaries run on Flatcar's glibc userland. flix bundles each
 # binary with its libraries and dynamic loader, so the merged tools run as
@@ -88,8 +89,44 @@ for b in $binaries; do
   esac
 done
 
-# Static overlay: tmpfiles and the like.
+# Ship the copyright file of every package a bundled file came from, plus the
+# /usr/share/common-licenses they refer to. flix copies libraries into
+# usr/local under their soname, so those are matched by name. A file no
+# package owns fails the build.
+awk '{ p = FILENAME; sub(".*/", "", p); sub("[.]list$", "", p); sub(":.*", "", p); print $0 "\t" p }' \
+  /var/lib/dpkg/info/*.list > /tmp/owners
+find "$name/usr" -type f | sed "s|^$name||" > /tmp/files
+: > /tmp/unowned
+awk -F '\t' '
+  NR == FNR { own[$1] = own[$1] " " $2; n = $1; sub(".*/", "", n); if ($1 ~ /^\/(usr\/)?lib/) lib[n] = lib[n] " " $2; next }
+  { n = $0; sub(".*/", "", n); k = /^\/usr\/local\// ? lib[n] : own[$0] }
+  k == "" { print > "/tmp/unowned"; next }
+  { m = split(k, a, " "); for (i = 1; i <= m; i++) print a[i] }
+' /tmp/owners /tmp/files > /tmp/pkgs
+# emacsen-common byte-compiles lisp at install time, next to a symlink to the
+# packaged .el. Credit the .elc to whoever owns that .el.
+while read -r f; do
+  p=
+  case "$f" in
+  *.elc) p="$(awk -F '\t' -v f="$(realpath -m "${f%c}")" '$1 == f { print $2 }' /tmp/owners)" ;;
+  esac
+  [ -n "$p" ] || { echo "no package owns $f" >&2 ; exit 1 ; }
+  echo "$p" >> /tmp/pkgs
+done < /tmp/unowned
+pkgs="$(sort -u /tmp/pkgs)"
+for p in $pkgs; do
+  mkdir -p "$name/usr/share/doc/$p"
+  cp -L "/usr/share/doc/$p/copyright" "$name/usr/share/doc/$p/"
+done
+cp -a /usr/share/common-licenses "$name/usr/share/"
+
+# Source packages behind the bundled files, for the release's source archive.
+dpkg-query -W -f='${source:Package} ${source:Version}\n' $pkgs | sort -u > "/out/SOURCES-$arch"
+
+# Overlay, then append the package list to its NOTICE.
 cp -a /overlay/. "$name/"
+dpkg-query -W -f='${Package} ${source:Package} ${source:Version}\n' $pkgs \
+  >> "$name/usr/share/doc/flatcar-tools/NOTICE"
 
 # extension-release: flix bundles the loader and libraries, so the image is
 # self-contained and loads on any OS (ID=_any); ARCHITECTURE must match.
@@ -116,5 +153,5 @@ mksquashfs "/out/$name" "$img" "$@" >/dev/null
 IN
 
 mv "$work/$name-$version-$arch.raw" .
-mv "$work/MANIFEST-$arch" "MANIFEST-$arch"
+mv "$work/MANIFEST-$arch" "$work/SOURCES-$arch" .
 echo "built $name-$version-$arch.raw"
