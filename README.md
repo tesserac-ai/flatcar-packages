@@ -42,7 +42,7 @@ build/smoke.sh tools-0.0.1-x86-64.raw
   Images build reproducibly, so it publishes a new rolling release only when
   an image hash changed; transfer edits are uploaded to the current release.
 - Dependabot bumps the GitHub Actions and the Debian base image every Friday;
-  non-major bumps auto-merge once CI is green.
+  non-major bumps auto-merge once the `build` check passes.
 
 ## Adding a tool
 
