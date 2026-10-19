@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Verify a built sysext image: the expected tools exist and actually run.
+# Check a built sysext image: the tools exist and run.
 #
 # Usage: build/smoke.sh <image.raw>
 
@@ -25,11 +25,10 @@ unsquashfs -q -d "$root/x" "$img" >/dev/null
 [ -e "$root/x/usr/lib/extension-release.d/extension-release.tools" ] \
   || { echo "missing extension-release.tools" >&2 ; exit 1 ; }
 
-# emacs reads this at launch (see overlay tmpfiles); systemd-tmpfiles makes it
-# on the real host. Mimic that here so the bundled emacs starts.
+# On a host the overlay's tmpfiles.d creates this; emacs won't start without it.
 mkdir -p /etc/emacs/site-start.d
 
-# Run each tool with the sysext's /usr bound at /, as on a merged host.
+# Run each tool with the image's /usr as /usr, as on a merged host.
 run() {
   bwrap --ro-bind "$root/x/usr" /usr --ro-bind /etc /etc \
     --proc /proc --dev /dev --tmpfs /tmp --setenv HOME /tmp "$@"
