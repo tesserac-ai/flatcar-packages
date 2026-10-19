@@ -2,21 +2,23 @@
 
 Builds systemd-sysext images of extra CLI tools for Flatcar Container Linux.
 The `tools` sysext (see `extensions/tools/packages`) is built from Debian
-packages, wrapped with flatwrap, packed as squashfs, and shipped via a rolling
+packages, bundled with flix, packed as squashfs, and shipped via a rolling
 GitHub release that hosts pull with systemd-sysupdate.
 
 ## Layout
 
 - `build/build.sh`: builds one arch into `tools-<version>-<arch>.raw`
 - `build/smoke.sh`: checks a built image has the expected entry points
-- `build/flatwrap.sh`: vendored from flatcar/sysext-bakery (Apache-2.0)
-- `build/Dockerfile`: declares the Alpine base; Dependabot bumps it
-- `extensions/tools/{packages,binaries}`: what goes in the sysext
+- `build/flix.sh`: vendored from flatcar/sysext-bakery (Apache-2.0)
+- `build/Dockerfile`: declares the Debian base; Dependabot bumps it
+- `extensions/tools/{packages,binaries,resources}`, `overlay/`: what goes in
+  the sysext; `build/smoke.sh` lists the tools it checks, keep it in sync
 - `examples/`, `docs/`: host-side provisioning
 
 ## Tech stack
 
-Bash, Docker, squashfs-tools (in-container), GitHub Actions.
+Bash, Docker, GitHub Actions. In-container: patchelf, squashfs-tools,
+bubblewrap.
 
 ## Style
 
@@ -28,7 +30,7 @@ Write code like a human, not a language model.
 - Comments only where a human would put them. Explain *why*, not *what*.
 - Flat over nested. Early returns over deep indentation.
 - Shell: pass shellcheck and shfmt clean (2-space indent, see .editorconfig).
-  Do not touch `build/flatwrap.sh`; it is vendored and excluded from linting.
+  Do not touch `build/flix.sh`; it is vendored and excluded from linting.
 
 ## Git
 
@@ -36,15 +38,22 @@ Conventional commits, enforced by commitlint.
 
 - Max 80 chars header, lowercase, no body unless necessary
 - No co-authored-by or similar trailers
-- Always rebase; keep history clean before merging
+- Always rebase; keep history clean before merging. GitHub cannot sign
+  rebase merges, so they only land on main via admin bypass; squash merges
+  stay signed.
 - Ask before deleting branches
 
 ## CI
 
 - `build`: builds x86-64 and smoke-tests on every PR
-- `release`: weekly (Fri) + on main; manifest-gated rolling release
+- `release`: weekly (Fri) + on main; x86-64 only. Images are reproducible,
+  so it publishes only when an image hash changed; transfer edits are uploaded
+  in place, a manual dispatch always publishes. Every publish makes hosts
+  download and flag a reboot.
 - `lint`: MegaLinter (terraform flavor)
-- `commit-lint`, `dependabot-auto-merge`
+- `commit-lint`
+- `dependabot-auto-merge`: non-major only, squash, not rebase. Only `build`
+  is a required check, so it merges once that passes.
 
 Pin every action to a commit SHA. Keep workflow permissions minimal.
 
