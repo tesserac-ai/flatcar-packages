@@ -75,8 +75,14 @@ jobs:
 
           # Unversioned copies give Ignition a download URL that never rotates.
           cp "tools-${VERSION}-x86-64.raw" tools-x86-64.raw
-          gh release delete tools --cleanup-tag --yes 2>/dev/null || true
+          # gh only honours --target when it creates the tag, so delete any first.
+          if grep -qx tools <<<"${releases}"; then
+            gh release delete tools --cleanup-tag --yes
+          elif gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/tools" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/tools"
+          fi
           gh release create tools \
+            --target "${GITHUB_SHA}" \
             --title "tools (rolling)" \
             --notes "Rolling tools sysext. Latest build: ${VERSION}." \
             tools-*.raw SHA256SUMS tools.transfer noop.transfer MANIFEST-*
