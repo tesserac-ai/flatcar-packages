@@ -5,13 +5,13 @@ example is in [../examples/tools-sysext.bu](../examples/tools-sysext.bu).
 
 ## The tools sysext
 
-At first boot, Ignition places three things:
-
-- the initial image at `/opt/extensions/tools/tools-<arch>.raw` (the stable
-  asset that tracks the latest release), with `/etc/extensions/tools.raw`
-  symlinked to it so systemd-sysext merges it;
-- the sysupdate transfer config at `/etc/sysupdate.tools.d/tools.transfer`;
-- a no-op transfer at `/etc/sysupdate.d/noop.transfer`.
+At first boot, Ignition writes the seed image to
+`/opt/extensions/tools/tools-0-<arch>.raw` from the unversioned asset that
+tracks the latest release, links `/etc/extensions/tools.raw` to it so
+systemd-sysext merges it, and installs the transfer config at
+`/etc/sysupdate.tools.d/tools.transfer` and a no-op transfer at
+`/etc/sysupdate.d/noop.transfer`. Version 0 makes the seed the oldest
+instance, so sysupdate prunes it like any other.
 
 After that, `systemd-sysext` merges the image into `/usr` on every boot and the
 binaries (`emacs`, `nano`, `ncdu`, `htop`) are on `PATH`.
@@ -24,8 +24,10 @@ reads `/etc/sysupdate.tools.d/tools.transfer`, fetches the `SHA256SUMS` index fr
 the rolling `tools` release, and downloads a newer image if one exists.
 
 A downloaded image becomes active on the next boot. The drop-in touches
-`/run/reboot-required` when the active image changed, so your reboot tooling
-can pick it up. To merge immediately without a reboot:
+`/run/reboot-required` when the update moves `/etc/extensions/tools.raw` to
+different bytes, so your reboot tooling can pick it up. It compares content,
+not paths, because the first update on a new host usually re-fetches the
+seed's bytes under a real version. To merge immediately without a reboot:
 
 ```sh
 systemd-sysupdate -C tools update
@@ -50,3 +52,6 @@ transfer that matches nothing instead of erroring.
   for rollback.
 - To pin a host to a specific version, drop the sysupdate drop-in and manage
   `/etc/extensions/tools.raw` yourself.
+- An unversioned `/opt/extensions/tools/tools-x86-64.raw` left by older
+  configs is never pruned; delete it once `/etc/extensions/tools.raw` points
+  elsewhere.

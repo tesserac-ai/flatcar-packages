@@ -7,9 +7,9 @@ version: 1.1.0
 
 storage:
   files:
-    # Initial tools image. The unversioned asset always resolves to the latest
-    # release; sysupdate takes over the versioned images after first boot.
-    - path: /opt/extensions/tools/tools-x86-64.raw
+    # Seed image from the unversioned asset, which tracks the latest release.
+    # Saved as version 0 so sysupdate prunes it as the oldest instance.
+    - path: /opt/extensions/tools/tools-0-x86-64.raw
       mode: 0644
       contents:
         source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools-x86-64.raw
@@ -24,28 +24,28 @@ storage:
         source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.transfer
 
   directories:
-    # Debian's emacs reads this at launch; the sysext also creates it via
-    # tmpfiles, but Ignition makes it deterministic at first boot.
+    # Also made by the sysext's tmpfiles.d; this way boot order doesn't matter.
     - path: /etc/emacs/site-start.d
 
   links:
     - path: /etc/extensions/tools.raw
-      target: /opt/extensions/tools/tools-x86-64.raw
+      target: /opt/extensions/tools/tools-0-x86-64.raw
       hard: false
 
 systemd:
   units:
+    # Enabled by default on stable, beta and alpha, but not on LTS.
     - name: systemd-sysupdate.timer
       enabled: true
 
-    # Update the tools component on each sysupdate run, and flag a reboot when
-    # the active image changed so the new version is merged on next boot.
+    # Update the tools component on each sysupdate run. Flag a reboot only when
+    # tools.raw moves to different bytes, not when the seed's bytes get a
+    # versioned name.
     - name: systemd-sysupdate.service
       dropins:
         - name: tools.conf
           contents: |
             [Service]
-            ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/tools.raw > /tmp/tools"
+            ExecStartPre=/usr/bin/sh -c 'readlink -f /etc/extensions/tools.raw > /run/tools-old'
             ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C tools update
-            ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/tools.raw > /tmp/tools-new"
-            ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/tools /tmp/tools-new; then touch /run/reboot-required; fi"
+            ExecStartPost=/usr/bin/sh -c 'cmp -s "$$(cat /run/tools-old)" /etc/extensions/tools.raw || touch /run/reboot-required'
