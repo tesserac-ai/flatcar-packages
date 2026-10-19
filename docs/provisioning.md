@@ -13,7 +13,7 @@ systemd-sysext merges it, and installs the transfer config at
 instance, so sysupdate prunes it like any other.
 
 After that, `systemd-sysext` merges the image into `/usr` on every boot and the
-binaries (`emacs`, `nano`, `ncdu`, `htop`) are on `PATH`.
+tools are on `PATH`.
 
 ## Updates
 
@@ -34,10 +34,6 @@ systemd-sysext refresh
 systemd-tmpfiles --create # emacs needs /etc/emacs/site-start.d
 ```
 
-The `systemd-tmpfiles` step is only needed for an in-place merge; on a normal
-boot it runs on its own. emacs ships a `tmpfiles.d` drop-in that creates the
-directory Debian's emacs reads at startup.
-
 Flatcar 4459.2.3 and LTS 4081.3.7 onwards ship a no-op transfer for the
 default, componentless sysupdate run. On older images, install the release's
 `noop.transfer` as `/etc/sysupdate.d/noop.transfer` (`noop.conf` on LTS), or
@@ -46,11 +42,15 @@ that run fails and the unit shows as failed; the tools update either way.
 ## Notes
 
 - The transfer uses `Verify=false`: integrity comes from `SHA256SUMS`, but the
-  index itself is not signed. dm-verity roothash signing can be layered on
-  later if you want stricter guarantees.
+  index itself is not signed. Publishing a signed `SHA256SUMS.gpg` and setting
+  `Verify=yes` would fix that.
+- `.transfer` files need systemd 257 or newer, which stable, beta and alpha
+  have. LTS (systemd 255) only reads `.conf`; install the file as
+  `/etc/sysupdate.tools.d/tools.conf` there.
 - `InstancesMax=3` keeps the last three images under `/opt/extensions/tools`
   for rollback.
-- To pin a host to a specific version, drop the sysupdate drop-in and manage
+- To pin a host to a specific version, remove the
+  `systemd-sysupdate.service.d/tools.conf` drop-in and manage
   `/etc/extensions/tools.raw` yourself.
 - An unversioned `/opt/extensions/tools/tools-x86-64.raw` left by older
   configs is never pruned; delete it once `/etc/extensions/tools.raw` points
