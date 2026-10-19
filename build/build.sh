@@ -63,6 +63,9 @@ trap 'chown -R "$(stat -c "%u:%g" /out)" /out 2>/dev/null || true' EXIT
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update >/dev/null
+# The base tag can lag the security archive by weeks, and flix bundles base
+# libraries such as libc and liblzma too.
+apt-get upgrade -y >/dev/null
 apt-get install -y --no-install-recommends $packages patchelf squashfs-tools >/dev/null
 
 # All resolved package versions (incl. dependencies), published for reference.
