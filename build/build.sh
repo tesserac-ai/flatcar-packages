@@ -25,14 +25,8 @@ arch="${1:?usage: build.sh <arch> <version>}"
 version="${2:?usage: build.sh <arch> <version>}"
 
 case "$arch" in
-x86-64)
-  platform=linux/amd64
-  multiarch=x86_64-linux-gnu
-  ;;
-arm64)
-  platform=linux/arm64/v8
-  multiarch=aarch64-linux-gnu
-  ;;
+x86-64) platform=linux/amd64 ;;
+arm64) platform=linux/arm64/v8 ;;
 *)
   echo "unknown arch '$arch' (want x86-64 or arm64)" >&2
   exit 1
@@ -58,10 +52,10 @@ docker run --rm -i \
   -v "$ext/overlay:/overlay:ro" \
   -v "$work:/out" \
   "$base" sh -s -- \
-  "$name" "$arch" "$version" "$multiarch" "$packages" "$binaries" "$resources" <<'IN'
+  "$name" "$arch" "$version" "$packages" "$binaries" "$resources" <<'IN'
 set -eu
-name="$1" ; arch="$2" ; version="$3" ; multiarch="$4"
-packages="$5" ; binaries="$6" ; resources="$7"
+name="$1" ; arch="$2" ; version="$3"
+packages="$4" ; binaries="$5" ; resources="$6"
 
 # Hand everything in the bind-mounted /out back to the host user on any exit,
 # so the caller can clean up even when the build fails partway.
@@ -82,14 +76,6 @@ for b in $binaries; do flixpaths="$flixpaths ${b%%=*}"; done
 
 # Bundle each binary with its libraries and loader.
 /flix.sh / "$name" $flixpaths $resources
-
-# The NSS plugins are dlopen'd at runtime, so they are never reported as needed
-# libraries. Drop them where flix already points the rpath (extralibs/), or
-# host name and user lookups fail. flix's own EXTRALIBS path can't create the
-# directory, so do it by hand.
-nss="/lib/$multiarch"
-mkdir -p "$name/usr/local/$name/extralibs"
-cp -a "$nss/libnss_files.so.2" "$nss/libnss_dns.so.2" "$name/usr/local/$name/extralibs/"
 
 # Debian ships e.g. /usr/bin/emacs as an alternatives symlink, which flix can't
 # wrap; expose the friendly name as a relative symlink to the real binary.
