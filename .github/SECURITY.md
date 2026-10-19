@@ -2,9 +2,10 @@
 
 ## Supported versions
 
-Only the current `main` branch is supported with security fixes.
+Only `main` and the latest `tools` release get security fixes.
 
 ## Reporting a vulnerability
 
-If you notice something, please use some Google Workspace Channel like
-**CyberSecurity Chatroom** or send an email to <devops@tesserac.ai>
+Use GitHub's
+[private vulnerability reporting](https://github.com/tesserac-ai/flatcar-packages/security/advisories/new)
+or email <security@tesserac.ai>. Please don't open a public issue.
