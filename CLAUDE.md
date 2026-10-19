@@ -9,6 +9,7 @@ GitHub release that hosts pull with systemd-sysupdate.
 
 - `build/build.sh`: builds one arch into `tools-<version>-<arch>.raw`
 - `build/smoke.sh`: checks a built image has the expected entry points
+- `build/sources.sh`: fetches the Debian source of the bundled packages
 - `build/flix.sh`: vendored from flatcar/sysext-bakery (Apache-2.0)
 - `build/Dockerfile`: declares the Debian base; Dependabot bumps it
 - `extensions/tools/{packages,binaries,resources}`, `overlay/`: what goes in

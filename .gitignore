@@ -8,6 +8,7 @@ megalinter-reports/
 SHA256SUMS
 MANIFEST-*
 SOURCES-*
+tools-*-source.tar
 
 ### Emacs ###
 *~
