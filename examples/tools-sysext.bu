@@ -18,11 +18,6 @@ storage:
       contents:
         source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/tools.transfer
 
-    # Make the default (componentless) sysupdate run a no-op.
-    - path: /etc/sysupdate.d/noop.transfer
-      contents:
-        source: https://github.com/tesserac-ai/flatcar-packages/releases/download/tools/noop.transfer
-
   directories:
     # Also made by the sysext's tmpfiles.d; this way boot order doesn't matter.
     - path: /etc/emacs/site-start.d
