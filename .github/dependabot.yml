@@ -11,6 +11,10 @@ updates:
     commit-message:
       prefix: ci
     open-pull-requests-limit: 10
+    # Non-major bumps merge unreviewed and then run in the release job. A
+    # week gives a bad upstream release time to be caught.
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: docker
     directory: /build
@@ -21,3 +25,5 @@ updates:
       timezone: Etc/UTC
     commit-message:
       prefix: build
+    cooldown:
+      default-days: 7
