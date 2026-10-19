@@ -50,12 +50,10 @@ jobs:
           set -euo pipefail
           cp examples/tools.transfer examples/noop.transfer .
 
-          # Images build reproducibly: equal hashes mean hosts would get the
-          # same bytes under a new version and flag a reboot for nothing. The
-          # dpkg manifest can't tell: emacs pulls in toolchain packages that
-          # never reach the image but change with every kernel update.
-          # Hosts fetch transfers only at first boot, so they update in place.
-          # A failed lookup or download aborts rather than publish and reboot.
+          # Equal hashes would make every host download the same ~80 MB under
+          # a new version. Not the dpkg manifest: emacs' toolchain deps churn
+          # without reaching the image. Ignition fetches the transfers once,
+          # so an edit replaces them in place. A gh failure aborts.
           prev="$(mktemp -d)"
           releases="$(gh release list --json tagName -q '.[].tagName')"
           if [ "${GITHUB_EVENT_NAME}" != workflow_dispatch ] && grep -qx tools <<<"${releases}"; then
@@ -73,7 +71,7 @@ jobs:
             exit 0
           fi
 
-          # Unversioned copies give Ignition a download URL that never rotates.
+          # Stable URL for the Ignition seed.
           cp "tools-${VERSION}-x86-64.raw" tools-x86-64.raw
           # The GPL and LGPL parts need their source next to the binary.
           build/sources.sh SOURCES-x86-64 "tools-${VERSION}-source.tar"
@@ -82,7 +80,7 @@ jobs:
 
           The image bundles Debian packages under their own licenses, listed in
           /usr/share/doc/flatcar-tools/NOTICE. Their source is in
-          tools-${VERSION}-source.tar; the tag marks the commit it was built from.
+          tools-${VERSION}-source.tar; the tag marks the commit the image was built from.
           EOF
           )"
           # gh only honours --target when it creates the tag, so delete any first.

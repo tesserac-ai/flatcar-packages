@@ -1,6 +1,5 @@
-# Entry-point binaries exposed on PATH, one per line. Absolute paths inside the
-# Debian root. Use `path=name` when the desired command name differs from the
-# binary (Debian ships /usr/bin/emacs as an alternatives symlink).
+# Binaries to put on PATH, one per line, as absolute paths in the Debian root.
+# `path=name` also links it on PATH as `name`.
 /usr/bin/emacs-nox=emacs
 /usr/bin/nano
 /usr/bin/htop

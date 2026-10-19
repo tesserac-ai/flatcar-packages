@@ -11,9 +11,9 @@ GitHub release that hosts pull with systemd-sysupdate.
 - `build/smoke.sh`: checks a built image has the expected entry points
 - `build/sources.sh`: fetches the Debian source of the bundled packages
 - `build/flix.sh`: vendored from flatcar/sysext-bakery (Apache-2.0)
-- `build/Dockerfile`: declares the Debian base; Dependabot bumps it
-- `extensions/tools/{packages,binaries,resources}`, `overlay/`: what goes in
-  the sysext; `build/smoke.sh` lists the tools it checks, keep it in sync
+- `build/Dockerfile`: the Debian base tag, never built
+- `extensions/tools/{packages,binaries,resources,overlay}`: what goes in the
+  sysext; list new tools in `build/smoke.sh` too
 - `examples/`, `docs/`: host-side provisioning
 
 ## Tech stack
@@ -49,8 +49,8 @@ Conventional commits, enforced by commitlint.
 - `build`: builds x86-64 and smoke-tests on every PR
 - `release`: weekly (Fri) + on main; x86-64 only. Images are reproducible,
   so it publishes only when an image hash changed; transfer edits are uploaded
-  in place, a manual dispatch always publishes. Every publish makes hosts
-  download and flag a reboot.
+  in place, a manual dispatch always publishes. Every publish makes each host
+  download ~80 MB.
 - `lint`: MegaLinter (terraform flavor)
 - `commit-lint`
 - `dependabot-auto-merge`: non-major only, squash, not rebase. Only `build`

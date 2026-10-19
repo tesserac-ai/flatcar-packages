@@ -1,9 +1,8 @@
 # flatcar-packages
 
 Extra command-line tools for [Flatcar Container Linux][flatcar], shipped as a
-[systemd-sysext][sysext] image. Flatcar's `/usr` is read-only and its base
-image deliberately minimal, so extra tools ship as a sysext rather than
-installed packages.
+[systemd-sysext][sysext] image, since Flatcar's `/usr` is read-only and has no
+package manager.
 
 ## What's in the `tools` sysext
 
@@ -14,22 +13,17 @@ installed packages.
 
 ## How hosts consume it
 
-Provision the sysext at first boot with Ignition and keep it current with
-`systemd-sysupdate`. A worked example is in
-[examples/tools-sysext.bu](examples/tools-sysext.bu); the mechanics are
-explained in [docs/provisioning.md](docs/provisioning.md).
-
-Released images live on the rolling [`tools`][release] GitHub release; hosts
-pull from there directly.
+Ignition provisions the sysext at first boot and `systemd-sysupdate` keeps it
+current; see [examples/tools-sysext.bu](examples/tools-sysext.bu) and
+[docs/provisioning.md](docs/provisioning.md). Hosts pull images straight from
+the rolling [`tools`][release] release.
 
 ## How it's built
 
 `build/build.sh <arch> <version>` installs the Debian packages in a container
-and bundles each binary with its libraries and dynamic loader using
-[flix][flix]. Debian's glibc binaries run on Flatcar's glibc userland, so once
-the sysext is merged the tools run as ordinary host processes — full host
-filesystem, host `/etc`, host identity. The result is packed into a squashfs
-sysext image.
+and bundles each binary with its libraries and loader using [flix][flix], so
+the merged tools run as plain host processes. The result is a squashfs sysext
+image.
 
 ```sh
 build/build.sh x86-64 0.0.1
@@ -46,12 +40,11 @@ build/smoke.sh tools-0.0.1-x86-64.raw
 
 ## Adding a tool
 
-Edit [extensions/tools/packages](extensions/tools/packages) (Debian package
-names). Put the binary you want on `PATH` in
-[extensions/tools/binaries](extensions/tools/binaries) (absolute path, or
-`path=name` to rename it), and any runtime data it needs (lisp, dumps) in
-[extensions/tools/resources](extensions/tools/resources). Open a PR; the build
-workflow validates it.
+Add the Debian package to [extensions/tools/packages](extensions/tools/packages),
+the binary to put on `PATH` to
+[extensions/tools/binaries](extensions/tools/binaries), and any runtime data it
+needs to [extensions/tools/resources](extensions/tools/resources). List it in
+`build/smoke.sh` too. Open a PR; CI builds and smoke-tests it.
 
 ## License
 

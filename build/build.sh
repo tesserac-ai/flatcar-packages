@@ -8,13 +8,11 @@
 #
 # Output, in the current directory:
 #   tools-<version>-<arch>.raw   squashfs sysext image
-#   MANIFEST-<arch>              package versions the image was built from
+#   MANIFEST-<arch>              packages installed in the build container
 #   SOURCES-<arch>               source packages of the bundled files
 #
-# Debian's glibc binaries run on Flatcar's glibc userland. flix bundles each
-# binary with its libraries and dynamic loader, so the merged tools run as
-# ordinary host processes with the full host filesystem, host /etc and host
-# identity. The only host dependency is docker.
+# flix bundles each binary with its libraries and loader, so the merged tools
+# run as plain host processes. The only build dependency is docker.
 
 set -euo pipefail
 
@@ -69,7 +67,7 @@ apt-get update >/dev/null
 apt-get upgrade -y >/dev/null
 apt-get install -y --no-install-recommends $packages patchelf squashfs-tools >/dev/null
 
-# All resolved package versions (incl. dependencies), published for reference.
+# Everything installed in the build container.
 dpkg-query -W -f='${Package} ${Version}\n' | sort > "/out/MANIFEST-$arch"
 
 cd /out
@@ -78,7 +76,6 @@ cd /out
 flixpaths=""
 for b in $binaries; do flixpaths="$flixpaths ${b%%=*}"; done
 
-# Bundle each binary with its libraries and loader.
 /flix.sh / "$name" $flixpaths $resources
 
 # Debian ships e.g. /usr/bin/emacs as an alternatives symlink, which flix can't
@@ -128,15 +125,14 @@ cp -a /overlay/. "$name/"
 dpkg-query -W -f='${Package} ${source:Package} ${source:Version}\n' $pkgs \
   >> "$name/usr/share/doc/flatcar-tools/NOTICE"
 
-# extension-release: flix bundles the loader and libraries, so the image is
-# self-contained and loads on any OS (ID=_any); ARCHITECTURE must match.
+# ID=_any: the image carries its own loader and libraries. ARCHITECTURE still
+# has to match the host.
 meta="$name/usr/lib/extension-release.d/extension-release.$name"
 mkdir -p "$(dirname "$meta")"
 printf 'ID=_any\nARCHITECTURE=%s\n' "$arch" > "$meta"
 
-# Keep the merged /usr world-traversable (apt and flix leave a few 0700 paths)
-# and drop setuid/setgid/sticky and group/other-write: this tree merges into
-# the host /usr, so it must not introduce a writable or setuid path.
+# This merges into the host /usr: no 0700 dirs, no setuid or sticky bits,
+# nothing group- or world-writable.
 chmod -R a+rX "$name"
 chmod -R a-st,go-w "$name"
 
