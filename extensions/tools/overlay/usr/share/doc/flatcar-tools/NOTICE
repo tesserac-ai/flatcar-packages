@@ -1,0 +1,15 @@
+This sysext bundles binaries, libraries and data from Debian packages, as
+dpkg installed them, except that patchelf rewrote the ELF interpreter and
+library search path so they load the libraries in /usr/local/tools. The
+patching happened at build time, on the date the image version starts with.
+
+Each package keeps its own license. Its copyright file is in
+/usr/share/doc/<package>/copyright, and the license texts those files refer
+to are in /usr/share/common-licenses.
+
+This image was published on the tools release together with the source of
+every package below, as tools-<version>-source.tar, and a tag on the commit
+it was built from:
+https://github.com/tesserac-ai/flatcar-packages/releases/tag/tools
+
+Package, source package, version:
