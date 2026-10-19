@@ -37,9 +37,15 @@ for b in emacs nano htop ncdu; do
   [ -e "$root/x/usr/bin/$b" ] || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
 done
 
-run /usr/bin/nano --version | head -1
-run /usr/bin/htop --version | head -1
-run /usr/bin/ncdu --version | head -1
+# Piping into head would drop the exit status of a tool that fails.
+ver() {
+  run "$@" >"$root/ver"
+  head -1 "$root/ver"
+}
+
+ver /usr/bin/nano --version
+ver /usr/bin/htop --version
+ver /usr/bin/ncdu --version
 run /usr/bin/emacs --batch --eval '(princ (concat "emacs " emacs-version))'
 echo
 echo "smoke ok: $img"
