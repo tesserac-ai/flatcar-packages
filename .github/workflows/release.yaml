@@ -75,6 +75,16 @@ jobs:
 
           # Unversioned copies give Ignition a download URL that never rotates.
           cp "tools-${VERSION}-x86-64.raw" tools-x86-64.raw
+          # The GPL and LGPL parts need their source next to the binary.
+          build/sources.sh SOURCES-x86-64 "tools-${VERSION}-source.tar"
+          notes="$(cat <<EOF
+          Rolling tools sysext. Latest build: ${VERSION}.
+
+          The image bundles Debian packages under their own licenses, listed in
+          /usr/share/doc/flatcar-tools/NOTICE. Their source is in
+          tools-${VERSION}-source.tar; the tag marks the commit it was built from.
+          EOF
+          )"
           # gh only honours --target when it creates the tag, so delete any first.
           if grep -qx tools <<<"${releases}"; then
             gh release delete tools --cleanup-tag --yes
@@ -84,5 +94,5 @@ jobs:
           gh release create tools \
             --target "${GITHUB_SHA}" \
             --title "tools (rolling)" \
-            --notes "Rolling tools sysext. Latest build: ${VERSION}." \
-            tools-*.raw SHA256SUMS tools.transfer noop.transfer MANIFEST-*
+            --notes "${notes}" \
+            tools-*.raw "tools-${VERSION}-source.tar" SHA256SUMS tools.transfer noop.transfer MANIFEST-*

@@ -55,8 +55,15 @@ workflow validates it.
 
 ## License
 
-Apache-2.0. `build/flix.sh` is vendored from the Flatcar sysext-bakery; see
-[NOTICE](NOTICE).
+The scripts and configs in this repo are Apache-2.0. `build/flix.sh` is
+vendored from the Flatcar sysext-bakery; see [NOTICE](NOTICE).
+
+The images bundle Debian packages as dpkg installed them, except that patchelf
+rewrote the ELF interpreter and library search path at build time. Each
+package keeps its own license. `/usr/share/doc/flatcar-tools/NOTICE` in the
+image lists them; each release carries their source as
+`tools-<version>-source.tar`, and its tag marks the commit the image was built
+from.
 
 [flatcar]: https://www.flatcar.org/
 [sysext]: https://www.flatcar.org/docs/latest/provisioning/sysext/
