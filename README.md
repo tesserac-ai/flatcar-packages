@@ -43,7 +43,7 @@ build/smoke.sh tools-0.0.1-x86-64.raw
   It publishes a new rolling release only when the resolved Debian package set
   actually changed.
 - Dependabot bumps the GitHub Actions and the Debian base image every Friday;
-  non-major bumps auto-merge once CI is green.
+  non-major bumps auto-merge once the `build` check passes.
 
 ## Adding a tool
 
