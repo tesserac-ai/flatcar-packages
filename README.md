@@ -40,8 +40,8 @@ build/smoke.sh tools-0.0.1-x86-64.raw
 ## Updates
 
 - The `release` workflow rebuilds weekly (Fridays) and on changes to `main`.
-  It publishes a new rolling release only when the resolved Debian package set
-  actually changed.
+  Images build reproducibly, so it publishes a new rolling release only when
+  an image hash changed; transfer edits are uploaded to the current release.
 - Dependabot bumps the GitHub Actions and the Debian base image every Friday;
   non-major bumps auto-merge once CI is green.
 

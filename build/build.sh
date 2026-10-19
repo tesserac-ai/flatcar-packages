@@ -8,7 +8,7 @@
 #
 # Output, in the current directory:
 #   tools-<version>-<arch>.raw   squashfs sysext image
-#   MANIFEST-<arch>              resolved package versions, for change detection
+#   MANIFEST-<arch>              package versions the image was built from
 #
 # Debian's glibc binaries run on Flatcar's glibc userland. flix bundles each
 # binary with its libraries and dynamic loader, so the merged tools run as
@@ -71,7 +71,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update >/dev/null
 apt-get install -y --no-install-recommends $packages patchelf squashfs-tools >/dev/null
 
-# All resolved package versions (incl. dependencies), for the release gate.
+# All resolved package versions (incl. dependencies), published for reference.
 dpkg-query -W -f='${Package} ${Version}\n' | sort > "/out/MANIFEST-$arch"
 
 cd /out

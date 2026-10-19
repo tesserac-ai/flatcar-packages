@@ -13,7 +13,7 @@ on:
       - examples/noop.transfer
       - .github/workflows/release.yaml
   schedule:
-    - cron: '0 5 * * 5' # Fridays 05:00 UTC
+    - cron: "0 5 * * 5" # Fridays 05:00 UTC
 
 permissions: {}
 
@@ -46,32 +46,36 @@ jobs:
           build/build.sh arm64 "${version}"
           sha256sum tools-*.raw > SHA256SUMS
 
-      - name: Publish rolling release if packages changed
+      - name: Publish rolling release if anything changed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          cp examples/tools.transfer examples/noop.transfer .
 
-          # The weekly build only publishes when the package set changed; a
-          # push or manual dispatch changes build inputs, so always publishes.
-          changed=true
-          if [ "${GITHUB_EVENT_NAME}" = schedule ]; then
-            mkdir -p prev
-            if gh release download tools -D prev -p 'MANIFEST-*' 2>/dev/null; then
-              if diff -q <(sort MANIFEST-x86-64) <(sort prev/MANIFEST-x86-64) >/dev/null \
-                && diff -q <(sort MANIFEST-arm64) <(sort prev/MANIFEST-arm64) >/dev/null; then
-                changed=false
-              fi
-            fi
-            rm -rf prev
+          # Images build reproducibly: equal hashes mean hosts would get the
+          # same bytes under a new version and flag a reboot for nothing. The
+          # dpkg manifest can't tell: emacs pulls in toolchain packages that
+          # never reach the image but change with every kernel update.
+          # Hosts fetch transfers only at first boot, so they update in place.
+          # A failed lookup or download aborts rather than publish and reboot.
+          prev="$(mktemp -d)"
+          releases="$(gh release list --json tagName -q '.[].tagName')"
+          if [ "${GITHUB_EVENT_NAME}" != workflow_dispatch ] && grep -qx tools <<<"${releases}"; then
+            gh release download tools -D "${prev}" -p SHA256SUMS -p tools.transfer -p noop.transfer
           fi
-
-          if [ "${changed}" = false ]; then
-            echo "no package changes since last release; nothing to publish"
+          if [ -e "${prev}/SHA256SUMS" ] \
+            && cmp -s <(cut -d' ' -f1 SHA256SUMS) <(cut -d' ' -f1 "${prev}/SHA256SUMS"); then
+            if cmp -s tools.transfer "${prev}/tools.transfer" \
+              && cmp -s noop.transfer "${prev}/noop.transfer"; then
+              echo "nothing changed since the last release"
+              exit 0
+            fi
+            gh release upload tools tools.transfer noop.transfer --clobber
+            echo "images unchanged; updated the transfers in place"
             exit 0
           fi
 
-          cp examples/tools.transfer examples/noop.transfer .
           # Unversioned copies give Ignition a download URL that never rotates.
           for a in x86-64 arm64; do cp "tools-${VERSION}-${a}.raw" "tools-${a}.raw"; done
           gh release delete tools --cleanup-tag --yes 2>/dev/null || true
