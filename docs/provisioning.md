@@ -9,8 +9,7 @@ At first boot, Ignition writes the seed image to
 `/opt/extensions/tools/tools-0-<arch>.raw` from the unversioned asset that
 tracks the latest release, links `/etc/extensions/tools.raw` to it so
 systemd-sysext merges it, and installs the transfer config at
-`/etc/sysupdate.tools.d/tools.transfer` and a no-op transfer at
-`/etc/sysupdate.d/noop.transfer`. Version 0 makes the seed the oldest
+`/etc/sysupdate.tools.d/tools.transfer`. Version 0 makes the seed the oldest
 instance, so sysupdate prunes it like any other.
 
 After that, `systemd-sysext` merges the image into `/usr` on every boot and the
@@ -39,9 +38,10 @@ The `systemd-tmpfiles` step is only needed for an in-place merge; on a normal
 boot it runs on its own. emacs ships a `tmpfiles.d` drop-in that creates the
 directory Debian's emacs reads at startup.
 
-The `noop.transfer` exists because the default, componentless
-`systemd-sysupdate.service` invocation still runs; it gives that invocation a
-transfer that matches nothing instead of erroring.
+Flatcar 4459.2.3 and LTS 4081.3.7 onwards ship a no-op transfer for the
+default, componentless sysupdate run. On older images, install the release's
+`noop.transfer` as `/etc/sysupdate.d/noop.transfer` (`noop.conf` on LTS), or
+that run fails and the unit shows as failed; the tools update either way.
 
 ## Notes
 
