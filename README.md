@@ -35,8 +35,11 @@ build/smoke.sh tools-0.0.1-x86-64.raw
 - The `release` workflow rebuilds weekly (Fridays) and on changes to `main`.
   Images build reproducibly, so it publishes a new rolling release only when
   an image hash changed; transfer edits are uploaded to the current release.
-- Dependabot bumps the GitHub Actions and the Debian base image every Friday;
-  non-major bumps auto-merge once the `build` check passes.
+- Dependabot bumps the GitHub Actions on Fridays after a week's cooldown;
+  non-major bumps auto-merge when `build` passes.
+- The Debian tag in `build/Dockerfile` only moves on a new major, which needs a
+  manual merge. Point and security updates need no bump: every build pulls the
+  tag and upgrades its packages.
 
 ## Adding a tool
 
