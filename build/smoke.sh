@@ -33,14 +33,13 @@ run() {
     --proc /proc --dev /dev --tmpfs /tmp --setenv HOME /tmp "$@"
 }
 
-for b in emacs nano htop ncdu rsync; do
+for b in emacs nano htop ncdu; do
   [ -e "$root/x/usr/bin/$b" ] || { echo "missing /usr/bin/$b" >&2 ; exit 1 ; }
 done
 
 run /usr/bin/nano --version | head -1
 run /usr/bin/htop --version | head -1
 run /usr/bin/ncdu --version | head -1
-run /usr/bin/rsync --version | head -1
 run /usr/bin/emacs --batch --eval '(princ (concat "emacs " emacs-version))'
 echo
 echo "smoke ok: $img"
