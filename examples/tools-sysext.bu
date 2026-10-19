@@ -46,6 +46,8 @@ systemd:
         - name: tools.conf
           contents: |
             [Service]
+            # An ~80 MB download; the default 90s start timeout is tight.
+            TimeoutStartSec=15min
             ExecStartPre=/usr/bin/sh -c 'readlink -f /etc/extensions/tools.raw > /run/tools-old'
             ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C tools update
             ExecStartPost=/usr/bin/sh -c 'cmp -s "$$(cat /run/tools-old)" /etc/extensions/tools.raw || touch /run/reboot-required'
